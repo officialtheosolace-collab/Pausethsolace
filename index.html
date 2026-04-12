@@ -394,10 +394,27 @@ html, body {
     let lineIndex = 0;
     let charIndex = 0;
     let builtText = '';
+    let bootFinished = false;
+
+    function setInitialState() {
+      bootWrap.classList.remove('hidden');
+      bootWrap.style.display = 'flex';
+      menuWrap.classList.remove('hidden');
+      menuWrap.style.display = 'none';
+      terminal.innerHTML = '';
+      lineIndex = 0;
+      charIndex = 0;
+      builtText = '';
+      bootFinished = false;
+      document.body.style.overflowY = 'hidden';
+    }
 
     function typeBootText() {
+      if (bootFinished) return;
+
       if (lineIndex >= bootLines.length) {
         terminal.innerHTML = builtText + '<span class="cursor">█</span>';
+        bootFinished = true;
         setTimeout(showMenu, 900);
         return;
       }
@@ -410,7 +427,8 @@ html, body {
         terminal.innerHTML = builtText + '<span class="cursor">█</span>';
         setTimeout(typeBootText, 28);
       } else {
-        builtText += '\n';
+        builtText += '
+';
         lineIndex++;
         charIndex = 0;
         terminal.innerHTML = builtText + '<span class="cursor">█</span>';
@@ -420,28 +438,25 @@ html, body {
 
     function showMenu() {
       bootWrap.classList.add('hidden');
+      bootWrap.style.display = 'none';
       menuWrap.style.display = 'block';
+      document.body.style.overflowY = 'auto';
     }
 
-    setTimeout(typeBootText, 1900);
+    function skipBoot() {
+      bootFinished = true;
+      showMenu();
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.key.toLowerCase() === 's') {
-        bootWrap.classList.add('hidden');
-        menuWrap.style.display = 'block';
+        skipBoot();
       }
     });
 
-    function updateScreenMode() {
-      if (menuWrap.style.display === 'block') {
-        document.body.style.overflowY = 'auto';
-      }
-    }
-
-    const originalShowMenu = showMenu;
-    showMenu = function () {
-      originalShowMenu();
-      updateScreenMode();
-    };
+    window.addEventListener('load', () => {
+      setInitialState();
+      setTimeout(typeBootText, 1900);
+    });
   </script></body>
   </html>
